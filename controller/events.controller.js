@@ -1,68 +1,49 @@
-const events = [
-    {
-      id: 1,
-      name: 'Event 1',
-      date: '2020-01-01',
-      time: '10:00',
-      description: 'This is the first event',
-      author: 'John Doe',
-      image: 'https://placehold.it/300x300',
-    },
-    {
-      id: 2,
-      name: 'Event 2',
-      date: '2020-01-01',
-      time: '10:00',
-      description: 'This is the second event',
-      author: 'John Doe',
-      image: 'https://placehold.it/300x300',
-    }
-];
+const Events = require('../models/event.model');
 
 const EventsController = {
-    getAllEvents: (req, res) => {
-
-        res.send(events);
-    },
-    getEventById: (req, res) => {
-        console.log("get one event : ", req.params.id);
-        const event = events.find(event => event.id === parseInt(req.params.id));
-        if (!event) {
-            res.status(404).send({ message: `Event with id ${req.params.id} not found` });
+    getAllEvents: async (req, res) => {
+        try {
+            const events = await Events.find();
+            res.send(events)
+        } catch (error) {
+            res.status(500).send({message: error.message})
         }
-        res.send(event)
     },
-    deleteEvent: (req, res) => {
-        console.log("delete event : ", req.params.id);
-        const event = events.find(event => event.id === parseInt(req.params.id));
-        if (!event) {
-            res.status(404).send({ message: `Event with id ${req.params.id} not found` });
+    getEventById: async (req, res) => {
+        try {
+            const event = await Events.findById(req.params.id);
+            res.send(event)
+        } catch (error) {
+            res.status(500).send({message: error.message})
         }
-        events.splice(events.indexOf(event), 1);
-        res.send(event);
     },
-    putEvent: (req, res) => {
-        console.log("put event : ", req.params.id);
-        let event = events.find(event => event.id === parseInt(req.params.id));
-        if (!event) {
-            res.status(404).send({ message: `Event with id ${req.params.id} not found` });
+    deleteEvent: async (req, res) => {
+        try {
+            const event = await Events.findByIdAndDelete(req.params.id);
+            res.send(event)
+        } catch (error) {
+            res.status(500).send({message: error.message})
         }
-        events[events.indexOf(event)] =  {
-        ...event,
-        ...req.body
-        };
-        console.log("put event : ", req.body);
-        res.send(event);
     },
-    postEvent: (req, res) => {
-        console.log("post event : ", req.body);
-        const event = {
-            id: events.length + 1,
-            ...req.body
-        };
-        events.push(event);
-        res.send(event);
+    putEvent: async (req, res) => {
+        try {
+            const event = await Events.findByIdAndUpdate(req.params.id, req.body);
+            res.send(event)
+        } catch (error) {
+            res.status(500).send({message: error.message})
+        }
+    },
+    postEvent: async (req, res) => {
+        try {
+            const event = await Events.create(req.body);
+            event.save();
+            res.send(event);
+        } catch (error) {
+            res.status(500).send({message: error.message})
+        }
     }
 }
 
 module.exports = EventsController;
+
+// key mongo : root eH20UkmYRAFwAYOg
